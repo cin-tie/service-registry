@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Регистр сервисов</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --line:#e1e4e8; --text:#1f2328; --muted:#656d76; --accent:#0969da; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --card:#161b22; --line:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:20px 16px 8px; max-width:960px; margin:0 auto; }
+  h1 { margin:0 0 4px; font-size:22px; }
+  header p { margin:0; color:var(--muted); }
+  main { max-width:960px; margin:0 auto; padding:8px 16px 40px; }
+  input { width:100%; padding:10px 12px; font-size:15px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--text); margin:12px 0; }
+  .svc { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:12px; }
+  .svc h2 { margin:0; font-size:17px; }
+  .url { color:var(--accent); font-family:ui-monospace,monospace; font-size:13px; word-break:break-all; }
+  .desc { color:var(--muted); margin:4px 0 8px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; display:block; overflow-x:auto; }
+  th, td { text-align:left; padding:6px 8px; border-top:1px solid var(--line); vertical-align:top; white-space:nowrap; }
+  td.wrap { white-space:normal; }
+  th { color:var(--muted); font-weight:600; }
+  code { font-family:ui-monospace,monospace; font-size:12.5px; }
+  .m { font-weight:700; }
+  .empty { color:var(--muted); text-align:center; padding:30px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Регистр сервисов</h1>
+  <p>Найдите нужный сервис и метод, затем оплатите его в сервисе оплаты.
+     API: <a href="/swagger" style="color:var(--accent)">/swagger</a></p>
+</header>
+<main>
+  <input id="q" type="search" placeholder="Поиск по сервису, методу или описанию…" autofocus>
+  <div id="list"></div>
+</main>
+<script>
+const list = document.getElementById('list');
+const q = document.getElementById('q');
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function render(services) {
+  if (!services.length) { list.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
+  list.innerHTML = services.map(s => `
+    <div class="svc">
+      <h2>${esc(s.name)}</h2>
+      <div class="url">${esc(s.baseUrl)}</div>
+      <div class="desc">${esc(s.description)}</div>
+      <table>
+        <tr><th>Метод</th><th>HTTP</th><th>Путь</th><th>Цена</th><th>Аргументы</th><th>Описание</th></tr>
+        ${s.methods.map(m => `
+          <tr>
+            <td class="m">${esc(m.name)}</td>
+            <td>${esc(m.httpMethod)}</td>
+            <td><code>${esc(m.path)}</code></td>
+            <td>${m.price ?? '—'}</td>
+            <td class="wrap">${m.parameters.map(p =>
+                `<code>${esc(p.name)}: ${esc(p.type)}</code> <small>(${esc(p.location)}${p.required ? ', обяз.' : ''})</small>`
+              ).join('<br>') || '—'}</td>
+            <td class="wrap">${esc(m.description)}</td>
+          </tr>`).join('')}
+      </table>
+    </div>`).join('');
+}
+
+async function load() {
+  const url = q.value.trim() ? '/api/services/search?q=' + encodeURIComponent(q.value.trim()) : '/api/services';
+  try {
+    const r = await fetch(url);
+    render(await r.json());
+  } catch (e) {
+    list.innerHTML = '<div class="empty">Не удалось загрузить реестр</div>';
+  }
+}
+let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(load, 250); });
+load();
+</script>
+</body>
+</html>
