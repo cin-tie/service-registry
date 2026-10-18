@@ -1,0 +1,64 @@
+{
+  "name": "BookService",
+  "baseUrl": "https://book-service.example.com",
+  "description": "Поиск и заказ книг в библиотеке",
+  "methods": [
+    {
+      "name": "GetBooks",
+      "httpMethod": "GET",
+      "path": "/api/books",
+      "description": "Список книг с фильтром по автору",
+      "paid": true,
+      "price": 5.00,
+      "parameters": [
+        {
+          "name": "author",
+          "type": "string",
+          "location": "query",
+          "required": false
+        },
+        {
+          "name": "token",
+          "type": "string",
+          "location": "header",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "OrderBook",
+      "httpMethod": "POST",
+      "path": "/api/orders",
+      "description": "Заказать книгу",
+      "paid": true,
+      "price": 8.50,
+      "parameters": [
+        {
+          "name": "bookId",
+          "type": "int",
+          "location": "body",
+          "required": true
+        },
+        {
+          "name": "readerName",
+          "type": "string",
+          "location": "body",
+          "required": true
+        },
+        {
+          "name": "token",
+          "type": "string",
+          "location": "header",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ReceivePaymentToken",
+      "httpMethod": "POST",
+      "path": "/internal/payment-token",
+      "description": "Служебный: приём токена от сервиса оплаты (скрыт)",
+      "paid": false
+    }
+  ]
+}
