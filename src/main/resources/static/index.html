@@ -1,84 +1,968 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Регистр сервисов</title>
-<style>
-  :root { --bg:#f6f7f9; --card:#fff; --line:#e1e4e8; --text:#1f2328; --muted:#656d76; --accent:#0969da; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg:#0d1117; --card:#161b22; --line:#30363d; --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; }
-  }
-  * { box-sizing: border-box; }
-  body { margin:0; font:15px/1.5 system-ui,sans-serif; background:var(--bg); color:var(--text); }
-  header { padding:20px 16px 8px; max-width:960px; margin:0 auto; }
-  h1 { margin:0 0 4px; font-size:22px; }
-  header p { margin:0; color:var(--muted); }
-  main { max-width:960px; margin:0 auto; padding:8px 16px 40px; }
-  input { width:100%; padding:10px 12px; font-size:15px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--text); margin:12px 0; }
-  .svc { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:12px; }
-  .svc h2 { margin:0; font-size:17px; }
-  .url { color:var(--accent); font-family:ui-monospace,monospace; font-size:13px; word-break:break-all; }
-  .desc { color:var(--muted); margin:4px 0 8px; }
-  table { width:100%; border-collapse:collapse; font-size:13.5px; display:block; overflow-x:auto; }
-  th, td { text-align:left; padding:6px 8px; border-top:1px solid var(--line); vertical-align:top; white-space:nowrap; }
-  td.wrap { white-space:normal; }
-  th { color:var(--muted); font-weight:600; }
-  code { font-family:ui-monospace,monospace; font-size:12.5px; }
-  .m { font-weight:700; }
-  .empty { color:var(--muted); text-align:center; padding:30px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <title>Реестр сервисов</title>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --soft: #f7f8fa;
+      --text: #202938;
+      --muted: #87909e;
+      --border: #e9ecf1;
+      --accent: #496fe8;
+      --accent-soft: #eef2ff;
+      --green: #18815d;
+      --green-bg: #e9f7f0;
+      --orange: #94620c;
+      --orange-bg: #fff5df;
+      --red: #c34b5a;
+      --red-bg: #fff0f1;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font: 14px/1.55 Inter, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input { font: inherit; }
+
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 3px solid #c7d4ff;
+      outline-offset: 3px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container {
+      width: min(1040px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    header {
+      height: 65px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+      font-weight: 650;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #dfe6ff;
+      border-radius: 8px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      font-size: 15px;
+    }
+
+    .header-link {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    main { padding: 54px 0 64px; }
+
+    .intro { margin-bottom: 30px; }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(27px, 4vw, 34px);
+      font-weight: 650;
+      line-height: 1.25;
+      letter-spacing: -1.3px;
+    }
+
+    .subtitle {
+      margin: 9px 0 24px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .search-wrap { position: relative; }
+
+    .search-icon {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search {
+      width: 100%;
+      height: 46px;
+      padding: 0 42px;
+      border: 1px solid #dfe3ea;
+      border-radius: var(--radius);
+      outline: none;
+      color: var(--text);
+      background: white;
+      transition: border-color .15s;
+    }
+
+    .search::placeholder { color: #a0a7b3; }
+
+    .search:focus { border-color: #9db2ff; }
+
+    .clear-search {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .clear-search:hover { background: var(--soft); }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: -.2px;
+    }
+
+    .muted { color: var(--muted); }
+
+    .count { font-size: 12px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+      align-items: start;
+      gap: 16px;
+    }
+
+    .service-list {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .service {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: left;
+      color: inherit;
+      background: white;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+
+    .service:hover { border-color: #cbd5ee; }
+
+    .service.selected {
+      border-color: #a8baff;
+      background: #fcfdff;
+    }
+
+    .service-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .service-name {
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+
+    .service-url {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .method-count {
+      flex-shrink: 0;
+      padding: 3px 7px;
+      border-radius: 5px;
+      color: #536cb9;
+      background: var(--accent-soft);
+      font-size: 10px;
+    }
+
+    .service-description {
+      margin: 11px 0 0;
+      color: #737d8c;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .panel {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: white;
+    }
+
+    .panel-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    h3 {
+      margin: 7px 0 0;
+      font-size: 20px;
+      font-weight: 650;
+      line-height: 1.35;
+      letter-spacing: -.6px;
+      overflow-wrap: anywhere;
+    }
+
+    .panel-description {
+      margin: 8px 0 0;
+      color: #737d8c;
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .base-url {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 7px;
+      background: var(--soft);
+      font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .base-label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font: 10px/1.5 Inter, sans-serif;
+    }
+
+    .registered {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .methods-section { padding: 18px 20px; }
+
+    .methods-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .methods-heading h4 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .method-row { border-top: 1px solid var(--border); }
+    .method-row:first-child { border-top: 0; }
+
+    .method-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 13px 0;
+      border: 0;
+      text-align: left;
+      color: inherit;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .verb {
+      min-width: 47px;
+      padding: 4px 5px;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .verb-GET { color: var(--green); background: var(--green-bg); }
+    .verb-POST { color: #4569c6; background: var(--accent-soft); }
+    .verb-PUT { color: var(--orange); background: var(--orange-bg); }
+    .verb-PATCH { color: #8055b6; background: #f3edff; }
+    .verb-DELETE { color: var(--red); background: var(--red-bg); }
+
+    .method-info { flex: 1; min-width: 0; }
+
+    .method-name {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .method-path {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .chevron {
+      color: #9ba3b0;
+      transition: transform .15s;
+    }
+
+    .method-toggle[aria-expanded="true"] .chevron {
+      transform: rotate(180deg);
+    }
+
+    .method-details {
+      padding: 0 0 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .method-description {
+      margin: 0 0 10px;
+      color: #737d8c;
+      font-size: 12px;
+    }
+
+    .price {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 4px 7px;
+      border-radius: 5px;
+      color: #4569c6;
+      background: var(--accent-soft);
+      font-size: 11px;
+    }
+
+    .params-wrap { overflow-x: auto; }
+
+    .params {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .params th {
+      padding: 8px 6px;
+      text-align: left;
+      color: var(--muted);
+      background: var(--soft);
+      font-weight: 550;
+      white-space: nowrap;
+    }
+
+    .params td {
+      padding: 9px 6px;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+
+    code {
+      font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .required { color: var(--red); }
+    .optional { color: var(--muted); }
+
+    .state {
+      padding: 35px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .state strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .retry {
+      margin-top: 12px;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      background: white;
+      cursor: pointer;
+    }
+
+    .retry:hover { background: var(--soft); }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 36px;
+      padding: 18px 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 720px) {
+      .container { width: calc(100% - 28px); }
+      main { padding-top: 35px; }
+      .layout { grid-template-columns: 1fr; }
+      .panel { grid-row: 1; }
+      .service-list { grid-row: 2; }
+      .panel { position: static; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<header>
-  <h1>Регистр сервисов</h1>
-  <p>Найдите нужный сервис и метод, затем оплатите его в сервисе оплаты.
-     API: <a href="/swagger" style="color:var(--accent)">/swagger</a></p>
-</header>
-<main>
-  <input id="q" type="search" placeholder="Поиск по сервису, методу или описанию…" autofocus>
-  <div id="list"></div>
-</main>
-<script>
-const list = document.getElementById('list');
-const q = document.getElementById('q');
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  <div class="container">
+    <header>
+      <a class="brand" href="/" aria-label="Реестр сервисов — главная">
+        <span class="brand-icon" aria-hidden="true">◇</span>
+        <span>Реестр сервисов</span>
+      </a>
+      <a class="header-link" href="/swagger">Документация API ↗</a>
+    </header>
 
-function render(services) {
-  if (!services.length) { list.innerHTML = '<div class="empty">Ничего не найдено</div>'; return; }
-  list.innerHTML = services.map(s => `
-    <div class="svc">
-      <h2>${esc(s.name)}</h2>
-      <div class="url">${esc(s.baseUrl)}</div>
-      <div class="desc">${esc(s.description)}</div>
-      <table>
-        <tr><th>Метод</th><th>HTTP</th><th>Путь</th><th>Цена</th><th>Аргументы</th><th>Описание</th></tr>
-        ${s.methods.map(m => `
-          <tr>
-            <td class="m">${esc(m.name)}</td>
-            <td>${esc(m.httpMethod)}</td>
-            <td><code>${esc(m.path)}</code></td>
-            <td>${m.price ?? '—'}</td>
-            <td class="wrap">${m.parameters.map(p =>
-                `<code>${esc(p.name)}: ${esc(p.type)}</code> <small>(${esc(p.location)}${p.required ? ', обяз.' : ''})</small>`
-              ).join('<br>') || '—'}</td>
-            <td class="wrap">${esc(m.description)}</td>
-          </tr>`).join('')}
-      </table>
-    </div>`).join('');
-}
+    <main>
+      <section class="intro">
+        <h1>Найдите нужный сервис</h1>
+        <p class="subtitle">
+          Каталог API-сервисов для вашей интеграции.
+        </p>
 
-async function load() {
-  const url = q.value.trim() ? '/api/services/search?q=' + encodeURIComponent(q.value.trim()) : '/api/services';
-  try {
-    const r = await fetch(url);
-    render(await r.json());
-  } catch (e) {
-    list.innerHTML = '<div class="empty">Не удалось загрузить реестр</div>';
-  }
-}
-let t; q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(load, 250); });
-load();
-</script>
+        <form id="search-form" role="search">
+          <div class="search-wrap">
+            <label class="sr-only" for="search">
+              Поиск по сервисам, методам и описанию
+            </label>
+            <svg class="search-icon" width="18" height="18"
+                 viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="10.8" cy="10.8" r="6.8"
+                      stroke="currentColor" stroke-width="1.7"/>
+              <path d="m16 16 4.5 4.5" stroke="currentColor"
+                    stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            <input id="search" class="search" type="search"
+                   placeholder="Поиск по названию, методу или описанию…"
+                   autocomplete="off">
+            <button id="clear-search" class="clear-search" type="button"
+                    aria-label="Очистить поиск" hidden>×</button>
+          </div>
+        </form>
+      </section>
+
+      <div class="section-heading">
+        <h2>Сервисы</h2>
+        <span class="count muted" id="count" aria-live="polite">
+          Загрузка…
+        </span>
+      </div>
+
+      <div class="layout">
+        <section id="service-list" class="service-list"
+                 aria-label="Список сервисов" aria-busy="true">
+          <div class="state">Загружаем реестр…</div>
+        </section>
+
+        <aside id="details" class="panel"
+               aria-label="Подробности сервиса" aria-live="polite">
+          <div class="state">
+            <strong>Выберите сервис</strong>
+            Методы и параметры появятся здесь.
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer>
+      <span>Реестр сервисов</span>
+      <span>API Catalog</span>
+    </footer>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = id => document.getElementById(id);
+      const searchInput = $("search");
+      const clearButton = $("clear-search");
+      const serviceList = $("service-list");
+      const details = $("details");
+      const count = $("count");
+
+      let services = [];
+      let selectedName = null;
+      let searchTimer;
+      let listRequestId = 0;
+      let detailRequestId = 0;
+      let expandedMethods = new Set();
+
+      // Экранирование любых данных, полученных от API.
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, char => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        })[char]);
+      }
+
+      // Разрешаем ссылки только на HTTP(S).
+      function safeUrl(value) {
+        try {
+          const url = new URL(String(value ?? ""));
+          return ["http:", "https:"].includes(url.protocol)
+            ? url.href : "";
+        } catch {
+          return "";
+        }
+      }
+
+      function getMethods(service) {
+        return Array.isArray(service?.methods) ? service.methods : [];
+      }
+
+      function pluralize(n, one, few, many) {
+        const lastTwo = n % 100;
+        const last = n % 10;
+
+        if (lastTwo >= 11 && lastTwo <= 14) return many;
+        if (last === 1) return one;
+        if (last >= 2 && last <= 4) return few;
+        return many;
+      }
+
+      function formatDate(value) {
+        if (!value) return "—";
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) return "—";
+
+        return new Intl.DateTimeFormat("ru-RU", {
+          day: "numeric",
+          month: "short",
+          year: "numeric"
+        }).format(date);
+      }
+
+      function formatPrice(value) {
+        if (value === null || value === undefined || value === "") {
+          return "Не указана";
+        }
+
+        const number = Number(value);
+
+        return Number.isFinite(number)
+          ? new Intl.NumberFormat("ru-RU", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }).format(number)
+          : escapeHtml(value);
+      }
+
+      function renderList() {
+        serviceList.setAttribute("aria-busy", "false");
+
+        if (services.length === 0) {
+          const searching = searchInput.value.trim().length > 0;
+
+          serviceList.innerHTML = `
+            <div class="state">
+              <strong>${searching
+                ? "Ничего не найдено"
+                : "Сервисов пока нет"}</strong>
+              ${searching
+                ? "Попробуйте изменить поисковый запрос."
+                : "Зарегистрированные сервисы появятся здесь."}
+            </div>`;
+
+          count.textContent = "0 сервисов";
+          return;
+        }
+
+        serviceList.innerHTML = services.map(service => {
+          const name = String(service?.name ?? "Без названия");
+          const baseUrl = safeUrl(service?.baseUrl);
+          const methods = getMethods(service);
+
+          return `
+            <button class="service ${name === selectedName ? "selected" : ""}"
+                    type="button"
+                    data-service-name="${escapeHtml(name)}"
+                    aria-pressed="${name === selectedName}">
+              <span class="service-title-row">
+                <span>
+                  <span class="service-name">${escapeHtml(name)}</span>
+                  <span class="service-url">${
+                    escapeHtml(baseUrl || service?.baseUrl || "Адрес не указан")
+                  }</span>
+                </span>
+                <span class="method-count">${methods.length}
+                  ${pluralize(methods.length, "метод", "метода", "методов")}
+                </span>
+              </span>
+              <span class="service-description">${
+                escapeHtml(service?.description || "Описание не добавлено.")
+              }</span>
+            </button>`;
+        }).join("");
+
+        count.textContent =
+          `${services.length} ${pluralize(
+            services.length, "сервис", "сервиса", "сервисов"
+          )}`;
+
+        serviceList.querySelectorAll("[data-service-name]").forEach(button => {
+          button.addEventListener("click", () => {
+            selectService(button.dataset.serviceName);
+          });
+        });
+      }
+
+      function renderDetails(service) {
+        const name = String(service?.name ?? "Без названия");
+        const baseUrl = safeUrl(service?.baseUrl);
+        const methods = getMethods(service);
+
+        const baseUrlHtml = baseUrl
+          ? `<a href="${escapeHtml(baseUrl)}"
+                target="_blank" rel="noopener noreferrer">
+                ${escapeHtml(baseUrl)}
+             </a>`
+          : escapeHtml(service?.baseUrl || "Не указан");
+
+        const methodsHtml = methods.length
+          ? methods.map((method, index) => {
+              const methodName = String(method?.name ?? "Без названия");
+              const id = `${name}::${methodName}::${index}`;
+              const open = expandedMethods.has(id);
+              const verb = String(method?.httpMethod ?? "GET").toUpperCase();
+              const allowedVerbs = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+              const verbClass = allowedVerbs.includes(verb) ? verb : "GET";
+              const params = Array.isArray(method?.parameters)
+                ? method.parameters : [];
+
+              const paramsHtml = params.length
+                ? `<div class="params-wrap">
+                    <table class="params">
+                      <thead>
+                        <tr>
+                          <th>Параметр</th>
+                          <th>Тип</th>
+                          <th>Расположение</th>
+                          <th>Обязательность</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${params.map(param => `
+                          <tr>
+                            <td><code>${escapeHtml(param?.name)}</code></td>
+                            <td>${escapeHtml(param?.type)}</td>
+                            <td>${escapeHtml(param?.location)}</td>
+                            <td class="${param?.required ? "required" : "optional"}">
+                              ${param?.required ? "Да" : "Нет"}
+                            </td>
+                          </tr>
+                        `).join("")}
+                      </tbody>
+                    </table>
+                  </div>`
+                : `<p class="method-description">Параметры не заданы.</p>`;
+
+              return `
+                <div class="method-row">
+                  <button class="method-toggle" type="button"
+                          data-method-id="${escapeHtml(id)}"
+                          aria-expanded="${open}">
+                    <span class="verb verb-${verbClass}">
+                      ${escapeHtml(verb)}
+                    </span>
+                    <span class="method-info">
+                      <span class="method-name">${escapeHtml(methodName)}</span>
+                      <span class="method-path">${
+                        escapeHtml(method?.path || "/")
+                      }</span>
+                    </span>
+                    <span class="chevron" aria-hidden="true">⌄</span>
+                  </button>
+
+                  ${open ? `
+                    <div class="method-details">
+                      ${method?.description ? `
+                        <p class="method-description">
+                          ${escapeHtml(method.description)}
+                        </p>` : ""}
+                      <span class="price">Цена: ${formatPrice(method?.price)}</span>
+                      ${paramsHtml}
+                    </div>` : ""}
+                </div>`;
+            }).join("")
+          : `<p class="panel-description">У сервиса нет публичных методов.</p>`;
+
+        details.innerHTML = `
+          <div class="panel-header">
+            <div class="eyebrow">Сервис</div>
+            <h3>${escapeHtml(name)}</h3>
+            ${service?.description ? `
+              <p class="panel-description">
+                ${escapeHtml(service.description)}
+              </p>` : ""}
+            <div class="base-url">
+              <span class="base-label">Базовый адрес</span>
+              ${baseUrlHtml}
+            </div>
+            <div class="registered">
+              Регистрация: ${escapeHtml(formatDate(service?.registeredAt))}
+            </div>
+          </div>
+
+          <div class="methods-section">
+            <div class="methods-heading">
+              <h4>Методы</h4>
+              <span class="count muted">${methods.length}</span>
+            </div>
+            <div>${methodsHtml}</div>
+          </div>`;
+
+        details.querySelectorAll("[data-method-id]").forEach(button => {
+          button.addEventListener("click", () => {
+            const id = button.dataset.methodId;
+
+            if (expandedMethods.has(id)) {
+              expandedMethods.delete(id);
+            } else {
+              expandedMethods.add(id);
+            }
+
+            renderDetails(service);
+          });
+        });
+      }
+
+      async function selectService(name) {
+        selectedName = name;
+        expandedMethods.clear();
+        renderList();
+
+        const requestId = ++detailRequestId;
+
+        details.innerHTML =
+          `<div class="state">Загружаем информацию…</div>`;
+
+        try {
+          const response = await fetch(
+            `/api/services/${encodeURIComponent(name)}`,
+            { headers: { Accept: "application/json" } }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const service = await response.json();
+
+          if (requestId !== detailRequestId) return;
+
+          renderDetails(service);
+        } catch (error) {
+          if (requestId !== detailRequestId) return;
+
+          console.error("Не удалось загрузить сервис:", error);
+
+          details.innerHTML = `
+            <div class="state">
+              <strong>Не удалось загрузить сервис</strong>
+              Проверьте соединение и попробуйте ещё раз.
+              <br>
+              <button class="retry" id="retry-details" type="button">
+                Повторить
+              </button>
+            </div>`;
+
+          $("retry-details").addEventListener("click", () => {
+            selectService(name);
+          });
+        }
+      }
+
+      async function loadServices(query = "") {
+        const requestId = ++listRequestId;
+
+        serviceList.setAttribute("aria-busy", "true");
+        count.textContent = "Загрузка…";
+        serviceList.innerHTML =
+          `<div class="state">Загружаем реестр…</div>`;
+
+        const endpoint = query
+          ? `/api/services/search?q=${encodeURIComponent(query)}`
+          : "/api/services";
+
+        try {
+          const response = await fetch(endpoint, {
+            headers: { Accept: "application/json" }
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (!Array.isArray(data)) {
+            throw new Error("Сервер вернул некорректный список сервисов");
+          }
+
+          if (requestId !== listRequestId) return;
+
+          services = data;
+
+          // Если текущий сервис остался в результатах поиска,
+          // сохраняем выбор. Иначе выбираем первый результат.
+          const stillExists = services.some(
+            service => service?.name === selectedName
+          );
+
+          if (!stillExists) {
+            selectedName = services[0]?.name ?? null;
+            expandedMethods.clear();
+          }
+
+          renderList();
+
+          if (selectedName) {
+            await selectService(selectedName);
+          } else {
+            ++detailRequestId;
+            details.innerHTML = `
+              <div class="state">
+                <strong>Нет выбранного сервиса</strong>
+                Выберите сервис из списка.
+              </div>`;
+          }
+        } catch (error) {
+          if (requestId !== listRequestId) return;
+
+          console.error("Не удалось загрузить реестр:", error);
+
+          serviceList.setAttribute("aria-busy", "false");
+          serviceList.innerHTML = `
+            <div class="state">
+              <strong>Не удалось загрузить реестр</strong>
+              Проверьте соединение с сервером.
+              <br>
+              <button class="retry" id="retry-list" type="button">
+                Повторить
+              </button>
+            </div>`;
+
+          count.textContent = "Ошибка";
+
+          $("retry-list").addEventListener("click", () => {
+            loadServices(searchInput.value.trim());
+          });
+        }
+      }
+
+      searchInput.addEventListener("input", () => {
+        clearButton.hidden = !searchInput.value;
+        clearTimeout(searchTimer);
+
+        searchTimer = setTimeout(() => {
+          loadServices(searchInput.value.trim());
+        }, 250);
+      });
+
+      clearButton.addEventListener("click", () => {
+        searchInput.value = "";
+        clearButton.hidden = true;
+        clearTimeout(searchTimer);
+        loadServices();
+        searchInput.focus();
+      });
+
+      $("search-form").addEventListener("submit", event => {
+        event.preventDefault();
+        clearTimeout(searchTimer);
+        loadServices(searchInput.value.trim());
+      });
+
+      loadServices();
+    })();
+  </script>
 </body>
 </html>
+
